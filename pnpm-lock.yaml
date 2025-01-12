@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: 0.6.0
-        version: 0.6.0
+        specifier: 0.7.0
+        version: 0.7.0
     devDependencies:
       '@types/node':
         specifier: ^20.11.24
@@ -21,8 +21,8 @@ importers:
 
 packages:
 
-  '@modelcontextprotocol/sdk@0.6.0':
-    resolution: {integrity: sha512-9rsDudGhDtMbvxohPoMMyAUOmEzQsOK+XFchh6gZGqo8sx9sBuZQs+CUttXqa8RZXKDaJRCN2tUtgGof7jRkkw==}
+  '@modelcontextprotocol/sdk@0.7.0':
+    resolution: {integrity: sha512-YlnQf8//eDHClUM607vb/6+GHmCdMnIfOkN2pcpexN4go9sYHm2JfNnqc5ILS7M8enUlwe9dQO9886l3NO3rUw==}
 
   '@types/node@20.17.12':
     resolution: {integrity: sha512-vo/wmBgMIiEA23A/knMfn/cf37VnuF52nZh5ZoW0GWt4e4sxNquibrMRJ7UQsA06+MBx9r/H1jsI9grYjQCQlw==}
@@ -85,7 +85,7 @@ packages:
 
 snapshots:
 
-  '@modelcontextprotocol/sdk@0.6.0':
+  '@modelcontextprotocol/sdk@0.7.0':
     dependencies:
       content-type: 1.0.5
       raw-body: 3.0.0
