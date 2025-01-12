@@ -19,7 +19,7 @@
     "format": "prettier --cache \"**/*.{js,json,md,css,js,ts,tsx}\" --write --ignore-path .gitignore"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "0.6.0"
+    "@modelcontextprotocol/sdk": "0.7.0"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.26.5",
