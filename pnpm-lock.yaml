@@ -17,6 +17,9 @@ importers:
       '@texonom/nclient':
         specifier: ^1.4.2
         version: 1.4.2
+      '@texonom/ntypes':
+        specifier: ^1.4.2
+        version: 1.4.2
       '@texonom/nutils':
         specifier: ^1.4.2
         version: 1.4.2
@@ -24,9 +27,6 @@ importers:
       '@babel/eslint-parser':
         specifier: ^7.26.5
         version: 7.26.5(@babel/core@7.26.0)(eslint@9.18.0)
-      '@texonom/ntypes':
-        specifier: ^1.4.2
-        version: 1.4.2
       '@types/node':
         specifier: ^20.11.24
         version: 20.17.12

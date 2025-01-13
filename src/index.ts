@@ -9,17 +9,21 @@ import { setListPrompts, setGetPrompt } from './prompts/index.js'
 import { NotionExporter } from '@texonom/cli'
 
 export type Note = { title: string; content: string }
+export type Content = { uri: string; mimeType: string; text: string }
+export type Resource = { uri: string; mimeType: string; name: string; description: string }
 
 /**
  * Start the server using stdio transport.
  * This allows the server to communicate via standard input/output streams.
  */
 async function main() {
-  const exporter = new NotionExporter({ page: process.env.ROOT_PAGE as string, domain: process.env.DOMAIN as string })
+  const domain = process.env.DOMAIN as string
+  const root = process.env.ROOT_PAGE as string
+  const exporter = new NotionExporter({ page: root, domain, folder: domain, validation: true })
   const client = exporter.notion
   const server = new Server(
     {
-      name: 'mcp',
+      name: 'notion-texonom',
       version: '0.1.0',
     },
     {
@@ -32,15 +36,15 @@ async function main() {
   )
   // Resources
   setReadResource(server, client, exporter)
-  setListResources(server)
+  setListResources(server, client, exporter)
 
   // Tools
   setListTools(server)
-  setCallTool(server)
+  setCallTool(server, client, exporter)
 
   // Prompts
   setListPrompts(server)
-  setGetPrompt(server)
+  setGetPrompt(server, client, exporter)
 
   const transport = new StdioServerTransport()
   await server.connect(transport)

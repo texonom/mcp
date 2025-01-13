@@ -1,9 +1,11 @@
 import { ListPromptsRequestSchema, GetPromptRequestSchema } from '@modelcontextprotocol/sdk/types.js'
+import { parsePageId } from '@texonom/nutils'
 
 import type { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import type { NotionAPI } from '@texonom/nclient'
 import type { NotionExporter } from '@texonom/cli'
-import type { Note } from '../index.js'
+
+const prompts = ['summarize_note', 'suggest_refactor', 'suggest_fix', 'suggest_enhance']
 
 export function setListPrompts(server: Server) {
   server.setRequestHandler(ListPromptsRequestSchema, async () => {
@@ -12,6 +14,13 @@ export function setListPrompts(server: Server) {
         {
           name: 'summarize_note',
           description: 'Summarize the given note',
+          arguments: [
+            {
+              name: 'uri',
+              description: 'The URI of the note to summarize',
+              required: true,
+            },
+          ]
         },
         {
           name: 'suggest_refactor',
@@ -30,21 +39,16 @@ export function setListPrompts(server: Server) {
   })
 }
 
-export function setGetPrompt(server: Server) {
+export function setGetPrompt(server: Server, client: NotionAPI, exporter: NotionExporter) {
   server.setRequestHandler(GetPromptRequestSchema, async request => {
-    const notes: Note[] = []
-    if (request.params.name !== 'summarize_note') {
+    if (!prompts.includes(request.params.name)) 
       throw new Error('Unknown prompt')
-    }
- 
-    const embeddedNotes = Object.entries(notes).map(([id, note]) => ({
-      type: 'resource' as const,
-      resource: {
-        uri: `note://${process.env.DOMAIN}/${id}`,
-        mimeType: 'text/plain',
-        text: note.content,
-      },
-    }))
+    const uri = String(request.params.arguments?.uri)
+    const id = parsePageId(uri)
+    if (!id) throw new Error(`Note ${uri} not found`)
+    const recordMap = await client.getPage(id)
+    if (!recordMap) throw new Error(`Record Map ${id} not found`)
+    const md = exporter.pageToMarkdown(id, recordMap)
 
     return {
       messages: [
@@ -52,18 +56,18 @@ export function setGetPrompt(server: Server) {
           role: 'user',
           content: {
             type: 'text',
-            text: 'Please summarize the following notes:',
+            text: 'Summarize the given note:',
           },
         },
-        ...embeddedNotes.map(note => ({
+        {
           role: 'user' as const,
-          content: note,
-        })),
+          content: md,
+        },
         {
           role: 'user',
           content: {
             type: 'text',
-            text: 'Provide a concise summary of all the notes above.',
+            text: 'Provide a concise summary of the note above.',
           },
         },
       ],

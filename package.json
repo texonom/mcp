@@ -12,7 +12,6 @@
   ],
   "scripts": {
     "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
-    "prepare": "npm run build",
     "watch": "tsc --watch",
     "inspector": "npx @modelcontextprotocol/inspector build/index.js",
     "lint": "eslint --cache \"**/*.{ts,tsx}\" --fix --ignore-path .gitignore",
@@ -22,11 +21,11 @@
     "@modelcontextprotocol/sdk": "0.7.0",
     "@texonom/cli": "^1.4.2",
     "@texonom/nclient": "^1.4.2",
+    "@texonom/ntypes": "^1.4.2",
     "@texonom/nutils": "^1.4.2"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.26.5",
-    "@texonom/ntypes": "^1.4.2",
     "@types/node": "^20.11.24",
     "@typescript-eslint/eslint-plugin": "^8.19.1",
     "@typescript-eslint/parser": "^8.19.1",

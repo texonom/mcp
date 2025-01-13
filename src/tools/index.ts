@@ -4,27 +4,24 @@ import type { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import type { NotionAPI } from '@texonom/nclient'
 import type { NotionExporter } from '@texonom/cli'
 import type { Note } from '../index.js'
+import type {  } from '@texonom/ntypes';
 
 export function setListTools(server: Server) {
   server.setRequestHandler(ListToolsRequestSchema, async () => {
     return {
       tools: [
         {
-          name: 'create_note',
-          description: 'Create a new note',
+          name: 'search_notes',
+          description: 'Search notes by a query',
           inputSchema: {
             type: 'object',
             properties: {
-              title: {
+              query: {
                 type: 'string',
-                description: 'Title of the note',
-              },
-              content: {
-                type: 'string',
-                description: 'Text content of the note',
+                description: 'Query to search',
               },
             },
-            required: ['title', 'content'],
+            required: ['query'],
           },
         },
       ],
@@ -32,27 +29,35 @@ export function setListTools(server: Server) {
   })
 }
 
-export function setCallTool(server: Server) {
+export function setCallTool(server: Server, client: NotionAPI, exporter: NotionExporter) {
   server.setRequestHandler(CallToolRequestSchema, async request => {
     const notes: Note[] = []
     switch (request.params.name) {
-      case 'find_relevent_notes': {
-        const title = String(request.params.arguments?.title)
-        const content = String(request.params.arguments?.content)
-        if (!title || !content) {
-          throw new Error('Title and content are required')
-        }
-
-        const id = 0
-        notes[id] = { title, content }
-
+      case 'search_notes': {
+        const query = String(request.params.arguments?.query)
+        if (!query) throw new Error('Query is required')
+        const response = await client.search({
+          query,
+          ancestorId: process.env.ROOT_PAGE as string,
+          filters: {
+            isDeletedOnly: false,
+            excludeTemplates: true,
+            navigableBlockContentOnly: true,
+            requireEditPermissions: false
+          }
+        })
+        const { results, recordMap } = response
+        const filteredResults = results.filter((result: { id: string }) => {
+          const block = recordMap.block[result.id]?.value
+          return block && block.type === 'page' && !block.is_template
+        })
         return {
-          content: [
-            {
+          content: filteredResults.map((result: { id: string }) => {
+            return {
               type: 'text',
-              text: `Created note ${id}: ${title}`,
-            },
-          ],
+              text: exporter.pageToMarkdown(result.id, recordMap)
+            }
+          })
         }
       }
 
