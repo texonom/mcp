@@ -1,4 +1,4 @@
-# MCP Server: Notion-Texonom
+# Notion MCP Server: `notion-texonom`
 
 **Markdown based Notion navigating MCP with just a single `ROOT_PAGE` variable, eliminating the need for a token.**
 
