@@ -31,7 +31,7 @@ export function setListResources(server: Server, client: NotionAPI, exporter: No
       const id = parsePageId(path)
       const slug = getCanonicalPageId(id, recordMap)
       resources.push({
-        uri: `note://${process.env.DOMAIN}/${slug}`,
+        uri: `note://${slug}`,
         mimeType: 'text/markdown',
         name: getBlockTitle(recordMap.block[id]?.value, recordMap),
         description: getPageDescription(recordMap.block[id]?.value, recordMap)

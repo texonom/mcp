@@ -17,9 +17,8 @@ export type Resource = { uri: string; mimeType: string; name: string; descriptio
  * This allows the server to communicate via standard input/output streams.
  */
 async function main() {
-  const domain = process.env.DOMAIN as string
   const root = process.env.ROOT_PAGE as string
-  const exporter = new NotionExporter({ page: root, domain, folder: domain, validation: true, recursive: true })
+  const exporter = new NotionExporter({ page: root, domain: String(), folder: String(), validation: true, recursive: true })
   const client = exporter.notion
   const server = new Server(
     {
