@@ -2,7 +2,7 @@
 
 **Markdown based Notion navigating MCP with just a single `ROOT_PAGE` variable, eliminating the need for a token.**
 
-- Notion pages are converted into text/markdown notes.
+- Notion pages are converted into `text/markdown` mimeType notes.
 - Search and retrieve relevant pages based on graph distance, considering parent-child and reference relationships.
 
 A Model Context Protocol (MCP) server for managing and interacting with Notion-based notes. This TypeScript-based server demonstrates MCP concepts by integrating resources, tools, and prompts to interact with Notion pages efficiently.
