@@ -1,76 +1,89 @@
-# mcp MCP Server
+# MCP Server: Notion-Texonom
 
-Model Context Protocol supported server interface for AI retrieval
-
-This is a TypeScript-based MCP server that implements a simple notes system. It demonstrates core MCP concepts by providing:
-
-- Resources representing text notes with URIs and metadata
-- Tools for creating new notes
-- Prompts for generating summaries of notes
+A Model Context Protocol (MCP) server for managing and interacting with Notion-based notes. This TypeScript-based server demonstrates MCP concepts by integrating resources, tools, and prompts to interact with Notion pages efficiently.
 
 ## Features
 
 ### Resources
-
-- List and access notes via `note://` URIs
-- Each note has a title, content and metadata
-- Plain text mime type for simple content access
+- **Access Notes**: List and retrieve Notion pages as `note://` URIs.
+- **Metadata**: Each resource includes a title, description, and content in Markdown format.
+- **Mime Types**: Content is accessible in `text/markdown` format.
 
 ### Tools
-
-- `create_note` - Create new text notes
-  - Takes title and content as required parameters
-  - Stores note in server state
+- **Search Notes**: Use the `search_notes` tool to search for Notion pages using a query string.
+  - Input: Query text to filter relevant pages.
+  - Output: Markdown content of matching notes.
 
 ### Prompts
-
-- `summarize_notes` - Generate a summary of all stored notes
-  - Includes all note contents as embedded resources
-  - Returns structured prompt for LLM summarization
+- **Summarize Notes**: Generate summaries for individual Notion pages.
+  - Available Prompts:
+    - `summarize_note`: Summarize a specific note by URI.
+    - `suggest_refactor`: Propose structural improvements.
+    - `suggest_fix`: Identify potential fixes for note content.
+    - `suggest_enhance`: Recommend enhancements to improve the note.
+  - Input: Notion page URI.
+  - Output: Structured messages for summarization and enhancement.
 
 ## Development
 
+### Setup
 Install dependencies:
-
 ```bash
-npm install
+pnpm install
 ```
-
-Build the server:
-
+Build the project:
 ```bash
-npm run build
+pnpm build
 ```
-
 For development with auto-rebuild:
 
 ```bash
-npm run watch
+pnpm watch
 ```
 
-## Installation
 
-To use with Claude Desktop, add the server config:
+## Configuration
+To configure the server with Notion:
 
-On MacOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
+- Set environment variables:
+  - `ROOT_PAGE`: The root page ID of your Notion workspace.
+  - `DOMAIN`: The domain associated with your Notion workspace.
+
+
+## Installation for Claude Desktop
+
+To use this server with Claude Desktop, add the configuration:
+
+- MacOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%/Claude/claude_desktop_config.json`
+
+Example configuration:
 
 ```json
 {
   "mcpServers": {
-    "mcp": {
-      "command": "/path/to/mcp/build/index.js"
+    "notion-texonom": {
+      "command": "node",
+      "args": [
+        "/path/to/mcp/build/index.js"
+      ],
+      "env": {
+        "ROOT_PAGE": "$SOME_UUID",
+        "DOMAIN": "$WHATEVER.com"
+      }
     }
   }
 }
 ```
 
 ### Debugging
-
-Since MCP servers communicate over stdio, debugging can be challenging. We recommend using the [MCP Inspector](https://github.com/modelcontextprotocol/inspector), which is available as a package script:
+For troubleshooting and debugging the MCP server, use the MCP Inspector. To start the Inspector, run:
 
 ```bash
 npm run inspector
 ```
+The Inspector provides a browser-based interface for inspecting stdio-based server communication.
 
-The Inspector will provide a URL to access debugging tools in your browser.
+## Key Technologies
+- Notion Integration: Powered by `@texonom/nclient` and `@texonom/cli.`
+- MCP SDK: Implements `@modelcontextprotocol/sdk` for server operations.
