@@ -9,15 +9,17 @@ import type { Resource, Content } from '../index.js'
 
 export function setListResources(server: Server, client: NotionAPI, exporter: NotionExporter) {
   server.setRequestHandler(ListResourcesRequestSchema, async () => {
+    const id = parsePageId(process.env.ROOT_PAGE as string)
     const { recordMap, pageTree, pageMap } = await getAllInSpace(
-      process.env.ROOT_PAGE as string,
+      id,
       client.getPage.bind(client),
       client.getBlocks.bind(client),
-      // @ts-ignore
       client.fetchCollections.bind(client),
       {
+        startRecordMap: exporter.recordMap,
         collectionConcurrency: 100,
         concurrency: 100,
+        maxPage: 100,
         fetchOption: { timeout: 10000 }
       }
     )
@@ -31,11 +33,11 @@ export function setListResources(server: Server, client: NotionAPI, exporter: No
       resources.push({
         uri: `note://${process.env.DOMAIN}/${slug}`,
         mimeType: 'text/markdown',
-        name: getBlockTitle(recordMap.block[path]?.value, recordMap),
-        description: getPageDescription(recordMap.block[path]?.value, recordMap)
+        name: getBlockTitle(recordMap.block[id]?.value, recordMap),
+        description: getPageDescription(recordMap.block[id]?.value, recordMap)
       })
     }
-    await exporter.exportMd(process.env.ROOT_PAGE as string)
+    await exporter.exportMd(id)
     await Promise.all(exporter.promises)
     return { resources }
   })
@@ -70,5 +72,5 @@ function getPageDescription(block: Block, recordMap: ExtendedRecordMap) {
     const secondBlockTitle = secondBlock ? getBlockTitle(secondBlock, recordMap).trim() : ''
     contentDescription = `${firstBlockTitle}\n${secondBlockTitle}`
   }
-  return contentDescription || description
+  return contentDescription
 }

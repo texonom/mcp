@@ -48,7 +48,7 @@ export function setGetPrompt(server: Server, client: NotionAPI, exporter: Notion
     if (!id) throw new Error(`Note ${uri} not found`)
     const recordMap = await client.getPage(id)
     if (!recordMap) throw new Error(`Record Map ${id} not found`)
-    const md = exporter.pageToMarkdown(id, recordMap)
+    const md = await exporter.pageToMarkdown(id, recordMap)
 
     return {
       messages: [
@@ -60,8 +60,11 @@ export function setGetPrompt(server: Server, client: NotionAPI, exporter: Notion
           },
         },
         {
-          role: 'user' as const,
-          content: md,
+          role: 'user',
+          content: {
+            type: 'text',
+            text: md
+          },
         },
         {
           role: 'user',

@@ -12,17 +12,17 @@ importers:
         specifier: 0.7.0
         version: 0.7.0
       '@texonom/cli':
-        specifier: ^1.4.2
-        version: 1.4.2(typanion@3.14.0)
+        specifier: ^1.4.4
+        version: 1.4.4(typanion@3.14.0)
       '@texonom/nclient':
-        specifier: ^1.4.2
-        version: 1.4.2
+        specifier: ^1.4.4
+        version: 1.4.4
       '@texonom/ntypes':
-        specifier: ^1.4.2
-        version: 1.4.2
+        specifier: ^1.4.4
+        version: 1.4.4
       '@texonom/nutils':
-        specifier: ^1.4.2
-        version: 1.4.2
+        specifier: ^1.4.4
+        version: 1.4.4
     devDependencies:
       '@babel/eslint-parser':
         specifier: ^7.26.5
@@ -457,21 +457,21 @@ packages:
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
 
-  '@texonom/cli@1.4.2':
-    resolution: {integrity: sha512-638Hzjs9ndpiKfOy9tLdkNd5KMjGDNRLYVXnxpG28zmGESacEed3ygoMMQlULAi+yacw9t+gBOr6tAVZyJjJyA==}
+  '@texonom/cli@1.4.4':
+    resolution: {integrity: sha512-lgPDlqDyQeHhkg71gqGJQ6gRF6uJL1rIyOzRXDRnyrbsOlF4M1TT/UaH9A8iKxta0SxtWvpVTXnKRGFiES704Q==}
     engines: {node: '>=20.18.1'}
     hasBin: true
 
-  '@texonom/nclient@1.4.2':
-    resolution: {integrity: sha512-hehYt1gTYFwNSHd87KmwmYMlBzpdXTljrsuZlvg5hGz1HZ4D4biuiFEunI2K6+sgxRjoUc2KBluqk47lbKxXMA==}
+  '@texonom/nclient@1.4.4':
+    resolution: {integrity: sha512-c1bLKBUjo0F7c9784eDvJ9sTT+IqVVgL3QH9nwVUa1KIPDMGMuv33EwlfE2AaATcJn1vtdCym08No6poMdpXug==}
     engines: {node: '>=20.18.1'}
 
-  '@texonom/ntypes@1.4.2':
-    resolution: {integrity: sha512-tC1XrkVVF3eVOxbdWUOx8bx9SvwSYydY/zB8FKoCZK4uJMeSZVryQhNp0GQucNApTQhcX0PYPC/r4QWm0CM+xA==}
+  '@texonom/ntypes@1.4.4':
+    resolution: {integrity: sha512-UacVvo+VPI6z0S84f/CNbgrLE79/5OV3w2Uimjhqt7EUEpRTqBxqwngXGnvFZthNriAxrXI7ybXmTzpj9qjFKA==}
     engines: {node: '>=20.18.1'}
 
-  '@texonom/nutils@1.4.2':
-    resolution: {integrity: sha512-bRqC2WXpD7yLsXBphxK4+/gfuSNXgD2lg+1RZ99PDuovpi2s9eHTMzt3B1LHOTsQpJ792g6TbJUgbJGJOky1Mg==}
+  '@texonom/nutils@1.4.4':
+    resolution: {integrity: sha512-FBRBHq8lwfIUXWYGoDZe2izmbUc3MmhYNGMCNd6N4+O9Si+jEz7Ae7chmZDAyfBkKkro9elHepspkxlUZrhTww==}
     engines: {node: '>=20.18.1'}
 
   '@types/estree@1.0.6':
@@ -2064,11 +2064,11 @@ snapshots:
 
   '@rtsao/scc@1.1.0': {}
 
-  '@texonom/cli@1.4.2(typanion@3.14.0)':
+  '@texonom/cli@1.4.4(typanion@3.14.0)':
     dependencies:
-      '@texonom/nclient': 1.4.2
-      '@texonom/ntypes': 1.4.2
-      '@texonom/nutils': 1.4.2
+      '@texonom/nclient': 1.4.4
+      '@texonom/ntypes': 1.4.4
+      '@texonom/nutils': 1.4.4
       JSONStream: 1.3.5
       clipanion: 3.2.1(typanion@3.14.0)
       graceful-fs: 4.2.11
@@ -2076,17 +2076,17 @@ snapshots:
     transitivePeerDependencies:
       - typanion
 
-  '@texonom/nclient@1.4.2':
+  '@texonom/nclient@1.4.4':
     dependencies:
-      '@texonom/ntypes': 1.4.2
-      '@texonom/nutils': 1.4.2
+      '@texonom/ntypes': 1.4.4
+      '@texonom/nutils': 1.4.4
       p-map: 5.5.0
 
-  '@texonom/ntypes@1.4.2': {}
+  '@texonom/ntypes@1.4.4': {}
 
-  '@texonom/nutils@1.4.2':
+  '@texonom/nutils@1.4.4':
     dependencies:
-      '@texonom/ntypes': 1.4.2
+      '@texonom/ntypes': 1.4.4
       is-url-superb: 6.1.0
       mem: 10.0.0
       normalize-url: 8.0.1

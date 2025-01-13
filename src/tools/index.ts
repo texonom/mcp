@@ -3,8 +3,7 @@ import { ListToolsRequestSchema, CallToolRequestSchema } from '@modelcontextprot
 import type { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import type { NotionAPI } from '@texonom/nclient'
 import type { NotionExporter } from '@texonom/cli'
-import type { Note } from '../index.js'
-import type {  } from '@texonom/ntypes';
+import type { ExtendedRecordMap } from '@texonom/ntypes'
 
 export function setListTools(server: Server) {
   server.setRequestHandler(ListToolsRequestSchema, async () => {
@@ -31,7 +30,6 @@ export function setListTools(server: Server) {
 
 export function setCallTool(server: Server, client: NotionAPI, exporter: NotionExporter) {
   server.setRequestHandler(CallToolRequestSchema, async request => {
-    const notes: Note[] = []
     switch (request.params.name) {
       case 'search_notes': {
         const query = String(request.params.arguments?.query)
@@ -43,21 +41,22 @@ export function setCallTool(server: Server, client: NotionAPI, exporter: NotionE
             isDeletedOnly: false,
             excludeTemplates: true,
             navigableBlockContentOnly: true,
-            requireEditPermissions: false
-          }
+            requireEditPermissions: false,
+          },
         })
         const { results, recordMap } = response
-        const filteredResults = results.filter((result: { id: string }) => {
+        const filteredResults = results.filter(result => {
           const block = recordMap.block[result.id]?.value
           return block && block.type === 'page' && !block.is_template
         })
         return {
-          content: filteredResults.map((result: { id: string }) => {
+          content: filteredResults.map(result => {
             return {
               type: 'text',
-              text: exporter.pageToMarkdown(result.id, recordMap)
+              // @ts-ignore
+              text: result.highlight.title
             }
-          })
+          }),
         }
       }
 
