@@ -7,6 +7,7 @@ import { setReadResource, setListResources } from './resources/index.js'
 import { setListTools, setCallTool } from './tools/index.js'
 import { setListPrompts, setGetPrompt } from './prompts/index.js'
 import { NotionExporter } from '@texonom/cli'
+import cors from 'cors'
 
 // Type definitions (if needed)
 export type Note = { title: string; content: string }
@@ -40,7 +41,7 @@ async function main() {
   const server = new Server(
     {
       name: 'notion-texonom',
-      version: '0.1.0',
+      version: '0.2.0',
     },
     {
       capabilities: {
@@ -65,6 +66,7 @@ async function main() {
 
   // Configure Express app and SSE transport
   const app = express()
+  app.use(cors())
   const BASE_URL = 'http://localhost'
   const PORT = Number(process.env.PORT) || 3000
   const SSE_PATH = '/sse'
@@ -81,6 +83,7 @@ async function main() {
   let sseTransport: SSEServerTransport | null = null
 
   app.get(SSE_PATH, async (req, res) => {
+    req.query.transportType = 'sse'
     console.log(`[notion-texonom] New SSE connection from ${req.ip}`)
     sseTransport = new SSEServerTransport(`${BASE_URL}:${PORT}${MESSAGE_PATH}`, res)
     try {
@@ -107,6 +110,7 @@ async function main() {
 
   // Endpoint to handle messages sent from the client
   app.post(MESSAGE_PATH, async (req, res) => {
+    req.query.transportType = 'sse'
     if (sseTransport && sseTransport.handlePostMessage) {
       console.log(`[notion-texonom] POST ${MESSAGE_PATH} -> processing SSE message`)
       await sseTransport.handlePostMessage(req, res)

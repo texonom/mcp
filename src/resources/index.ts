@@ -19,8 +19,8 @@ export function setListResources(server: Server, client: NotionAPI, exporter: No
         startRecordMap: exporter.recordMap,
         collectionConcurrency: 100,
         concurrency: 100,
-        maxPage: 100,
-        fetchOption: { timeout: 10000 }
+        maxPage: 10,
+        fetchOption: { timeout: 1000 }
       }
     )
     exporter.recordMap = recordMap
