@@ -1,65 +1,42 @@
 #!/usr/bin/env node
-
 import express from 'express'
 import bodyParser from 'body-parser'
-import { spawn, ChildProcessWithoutNullStreams } from 'child_process'
-import yargs from 'yargs'
-import { hideBin } from 'yargs/helpers'
 import { Server } from '@modelcontextprotocol/sdk/server/index.js'
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js'
-import { JSONRPCMessage } from '@modelcontextprotocol/sdk/types.js'
 import { setReadResource, setListResources } from './resources/index.js'
 import { setListTools, setCallTool } from './tools/index.js'
 import { setListPrompts, setGetPrompt } from './prompts/index.js'
 import { NotionExporter } from '@texonom/cli'
 
+// Type definitions (if needed)
 export type Note = { title: string; content: string }
 export type Content = { uri: string; mimeType: string; text: string }
 export type Resource = { uri: string; mimeType: string; name: string; description: string }
 
+
+/**
+ * Start the server using SSE transport.
+ * This migration is required for remote deployment for shared usage of the server.
+ */
 async function main() {
-  const argv = yargs(hideBin(process.argv))
-    .option('port', {
-      type: 'number',
-      default: 8000,
-      description: 'Port to run on (default: 8000)'
-    })
-    .option('stdio', {
-      type: 'string',
-      demandOption: true,
-      description: 'Command that runs an MCP server over stdio'
-    })
-    .option('baseUrl', {
-      type: 'string',
-      default: '',
-      description: 'Base URL for the server'
-    })
-    .help()
-    .parseSync()
-
-  const PORT = argv.port
-  const STDIO_CMD = argv.stdio
-  const BASE_URL = argv.baseUrl
-
-  console.log('[supergateway] Starting...')
-  console.log('[supergateway] Supergateway is supported by Superinterface - https://superinterface.ai')
-  console.log(`[supergateway]  - port: ${PORT}`)
-  console.log(`[supergateway]  - stdio: ${STDIO_CMD}`)
-
-  if (BASE_URL) {
-    console.log(`[supergateway]  - baseUrl: ${BASE_URL}`)
+  // Retrieve the root page and other configurations from environment variables.
+  const root = process.env.ROOT_PAGE as string
+  if (!root) {
+    console.error('Error: ROOT_PAGE environment variable is not set.')
+    process.exit(1)
   }
 
-  const child: ChildProcessWithoutNullStreams = spawn(STDIO_CMD, { shell: true })
-
-  child.on('exit', (code, signal) => {
-    console.error(`[supergateway] Child process exited with code=${code}, signal=${signal}`)
-    process.exit(code ?? 1)
+  // Initialize NotionExporter.
+  const exporter = new NotionExporter({
+    page: root,
+    domain: String(),
+    folder: String(),
+    validation: true,
+    recursive: true,
   })
-
-  const root = process.env.ROOT_PAGE as string
-  const exporter = new NotionExporter({ page: root, domain: String(), folder: String(), validation: true, recursive: true })
   const client = exporter.notion
+
+  // Create a server instance
   const server = new Server(
     {
       name: 'notion-texonom',
@@ -86,82 +63,67 @@ async function main() {
   setListPrompts(server)
   setGetPrompt(server, client, exporter)
 
-  let sseTransport: SSEServerTransport | undefined
-
+  // Configure Express app and SSE transport
   const app = express()
+  const BASE_URL = 'http://localhost'
+  const PORT = Number(process.env.PORT) || 3000
+  const SSE_PATH = '/sse'
+  const MESSAGE_PATH = '/message'
 
+  // JSON request parsing middleware (only for POST /message)
   app.use((req, res, next) => {
-    if (req.path === '/message') {
+    if (req.path === MESSAGE_PATH)
       return next()
-    }
-
     return bodyParser.json()(req, res, next)
   })
 
-  app.get('/sse', async (req, res) => {
-    console.log(`[supergateway] New SSE connection from ${req.ip}`)
+  // SSE connection setup endpoint
+  let sseTransport: SSEServerTransport | null = null
 
-    sseTransport = new SSEServerTransport(`${BASE_URL}/message`, res)
-    await server.connect(sseTransport)
-
-    sseTransport.onmessage = (msg: JSONRPCMessage) => {
-      const line = JSON.stringify(msg)
-      console.log('[supergateway] SSE -> Child:', line)
-      child.stdin.write(line + '\n')
+  app.get(SSE_PATH, async (req, res) => {
+    console.log(`[notion-texonom] New SSE connection from ${req.ip}`)
+    sseTransport = new SSEServerTransport(`${BASE_URL}:${PORT}${MESSAGE_PATH}`, res)
+    try {
+      await server.connect(sseTransport)
+      console.log('[notion-texonom] Server connected via SSE transport.')
+    } catch (error) {
+      console.error('[notion-texonom] Error connecting server via SSE:', error)
+      res.status(500).end()
     }
 
+    // Optionally, define handlers for onmessage, onclose, and onerror.
+    sseTransport.onmessage = (msg) => {
+      console.log('[notion-texonom] SSE received message:', msg)
+      // Additional processing if needed
+    }
     sseTransport.onclose = () => {
-      console.log('[supergateway] SSE connection closed.')
+      console.log('[notion-texonom] SSE connection closed.')
+      sseTransport = null
     }
-
-    sseTransport.onerror = err => {
-      console.error('[supergateway] SSE transport error:', err)
+    sseTransport.onerror = (err) => {
+      console.error('[notion-texonom] SSE transport error:', err)
     }
   })
 
-  app.post('/message', async (req, res) => {
-    if (sseTransport?.handlePostMessage) {
-      console.log('[supergateway] POST /message -> SSE transport')
+  // Endpoint to handle messages sent from the client
+  app.post(MESSAGE_PATH, async (req, res) => {
+    if (sseTransport && sseTransport.handlePostMessage) {
+      console.log(`[notion-texonom] POST ${MESSAGE_PATH} -> processing SSE message`)
       await sseTransport.handlePostMessage(req, res)
     } else {
       res.status(503).send('No SSE connection active')
     }
   })
 
-  let buffer = ''
-
-  child.stdout.on('data', (chunk: Buffer) => {
-    buffer += chunk.toString('utf8')
-
-    let lines = buffer.split(/\r?\n/)
-
-    buffer = lines.pop() ?? ''
-
-    for (const line of lines) {
-      if (!line.trim()) continue
-      try {
-        const jsonMsg = JSON.parse(line)
-        console.log('[supergateway] Child -> SSE:', jsonMsg)
-        sseTransport?.send(jsonMsg)
-      } catch {
-        console.error('[supergateway] Child produced non-JSON line:', line)
-      }
-    }
-  })
-
-  child.stderr.on('data', (chunk: Buffer) => {
-    const text = chunk.toString('utf8')
-    console.log('[supergateway] [child stderr]', text)
-  })
-
+  // Start the server
   app.listen(PORT, () => {
-    console.log(`[supergateway] Listening on port ${PORT}`)
-    console.log(`  SSE endpoint:   http://localhost:${PORT}/sse`)
-    console.log(`  POST messages:  http://localhost:${PORT}/message`)
+    console.log(`[notion-texonom] Listening on port ${PORT}`)
+    console.log(`  SSE endpoint:   http://localhost:${PORT}${SSE_PATH}`)
+    console.log(`  POST messages:  http://localhost:${PORT}${MESSAGE_PATH}`)
   })
 }
 
-main().catch(err => {
-  console.error('[supergateway] Fatal error:', err)
+main().catch(error => {
+  console.error('Server error:', error)
   process.exit(1)
 })
