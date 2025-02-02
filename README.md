@@ -99,3 +99,17 @@ The Inspector provides a browser-based interface for inspecting stdio-based serv
 ## Key Technologies
 - Notion Integration: Powered by `@texonom/nclient` and `@texonom/cli.`
 - MCP SDK: Implements `@modelcontextprotocol/sdk` for server operations.
+
+## Remote Deployment
+
+The server now uses `SSEServerTransport` for remote communication, enabling shared usage of the server. Ensure that the necessary dependencies are installed and the server is configured correctly for remote deployment.
+
+## Usage Instructions
+
+To run the server with `SSEServerTransport`, use the following command:
+
+```bash
+npx -y supergateway --port 8000 --stdio "npx -y @modelcontextprotocol/server-filesystem /some/folder"
+```
+
+Make sure to replace `/some/folder` with the appropriate path to your folder.
